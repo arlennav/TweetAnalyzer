@@ -2724,18 +2724,34 @@ article img.pull-right, article .align-right {
  padding-left: 10px;
 }
 
+.category{
+  padding: 5px;
+  color:#000000;
+  font-weight: bold;
+  padding-top: 5px;
+}
+
 .positive{
-  padding-left: 5px;
+  padding: 5px;
   background:#b3ffcc;
   color:#000000;
 }
+
 .negetive{
-  padding-left: 5px;
+  padding: 5px;
   background: #ff6666;
   color:#000000;
 }
 .neutral{
-  padding-left: 5px;
+  padding: 5px;
   background:#ffcc99;
   color:#000000;
 }
+
+.btn-xl {
+  padding: 10px 20px;
+  font-size: 20px;
+  border-radius: 10px;
+  width:50%;
+}
+
