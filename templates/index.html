@@ -103,9 +103,12 @@
                 <p class="neutral">Sentiment: {{ tweet.tweetsentiment }} </p>
                 {% endif %}
                 {% endif %}
-                <div style="height: 100px;"> {{ tweet.tweet }}</div>
-                <p class="category">Category: {{ tweet.imagetype }}</p>
-                <p></p>
+                <div class="tweetcontent"> {{ tweet.tweet }}</div>
+                <p class="category25">Cifar:
+                  <span>{{ tweet.imagetypeCifar }}</span></p>
+                <p class="category">Xception:<br/>
+                  <span>{{ tweet.imagetypeXception }}</span></p>
+
                 <input class="btn btn-block btn-primary" type="button" value="Tweet"
                   onclick="sendTweet('{{ tweet.id }}'); return false;"
                   {{ 'disabled' if tweet.tweetsentiment=='NEGATIVE' }}>

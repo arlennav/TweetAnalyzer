@@ -2729,7 +2729,27 @@ article img.pull-right, article .align-right {
   color:#000000;
   font-weight: bold;
   padding-top: 5px;
+  height: 50px;
+  word-wrap: break-word;
 }
+.category25{
+  padding: 5px;
+  color:#000000;
+  font-weight: bold;
+  padding-top: 5px;
+  height: 25px;
+  word-wrap: break-word;
+}
+
+
+.tweetcontent{
+  padding: 5px;
+  color:#000000;
+  padding-top: 5px;
+  height: 100px;
+
+}
+
 
 .positive{
   padding: 5px;

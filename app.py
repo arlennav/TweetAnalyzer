@@ -16,6 +16,8 @@ from TwitterAPI import TwitterAPI
 
 import pickle
 import tensorflow as tf
+
+
 from keras.models import load_model
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
@@ -24,10 +26,14 @@ from keras.optimizers import Adam
 from keras.utils import np_utils
 from keras import initializers
 from keras.models import model_from_json
+
 from config import *
-from cnnCifar100 import CIFAR100model 
+from cnnCifar100 import CIFAR100model
+from xceptionClassification import imageClassification
+
 import matplotlib.pyplot as plt
 from PIL import Image
+from resizeimage import resizeimage
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -47,6 +53,7 @@ Base.prepare(db.engine, reflect=True)
 # Save references to each table
 Tweets = Base.classes.tweets
 
+'''
 @app.after_request
 def add_header(r):
     """
@@ -58,19 +65,22 @@ def add_header(r):
     r.headers["Expires"] = "0"
     r.headers['Cache-Control'] = 'public, max-age=0'
     return r
+'''
 
 def init():
-    global sentiment_model,cnn_cifar100_model,graph,tokenizer
+    global sentiment_model,xception_model,tokenizer,cnn_cifar100_model
     # load the pre-trained Keras model for sentiment analysis
     sentiment_model = load_model('resources/sentiment_model.h5')
-    graph = tf.get_default_graph()
+    #xception_model = Xception(include_top=True, weights='imagenet', input_tensor=None, input_shape=None, pooling=None, classes=1000)
     tokenizer = Tokenizer()
     with open('resources/tokenizer.pkl', 'rb') as handle:
         tokenizer = pickle.load(handle)
-    # load the pre-trained Keras model for sentiment analysis
+    #xception
+    xception_model= imageClassification()
+    #cifar
     cnn_cifar100_model= CIFAR100model()
     cnn_cifar100_model.load_model()
-        
+    
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -86,12 +96,11 @@ def decode_sentiment(score, include_neutral=True):
     else:
         return NEGATIVE if score < 0.5 else POSITIVE
 
-def predict(text, include_neutral=True):
+def sentiment_predict(text, include_neutral=True):
     # Tokenize text
     x_test = pad_sequences(tokenizer.texts_to_sequences([text]), maxlen=300)
     # Predict
-    with graph.as_default():
-        score = sentiment_model.predict([x_test])[0]
+    score = sentiment_model.predict([x_test])[0]
     # Decode sentiment
     label = decode_sentiment(score, include_neutral=include_neutral)
     return {"label": label, "score": float(score)}  
@@ -138,20 +147,32 @@ def index():
             uploaded_img_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             filename_original, file_extension = os.path.splitext(filename) 
             image = Image.open(uploaded_img_path)
-            thumb_image=image.resize((200, 200))
+            thumb_image = resizeimage.resize_contain(image, [200, 200])
             thumb_image.save(os.path.join(app.config['UPLOAD_FOLDER'], f'{filename_original}_thumb{file_extension}'))
+           
             # Preditct image category
+            #Cifar
             uploaded_img = plt.imread(uploaded_img_path)
-            with graph.as_default():
-                imagetype=cnn_cifar100_model.model_predict(uploaded_img)
-                if imagetype=='':
-                    imagetype='Not detected'
+            imagetypeCifar=cnn_cifar100_model.model_predict(uploaded_img)
+            if imagetypeCifar=='':
+                imagetypeCifar='Not detected'
+            
+            #Xception
+            imagetypeXception=xception_model.model_predict(uploaded_img_path)
+            if imagetypeXception=='':
+                imagetypeXception='Not detected'
+                
             # Preditct sentiment of the tweet
-            sentiment_result=predict(valtweet)
+            sentiment_result=sentiment_predict(valtweet)
+            
             #Insert into Tweets table
-            tweet = Tweets(tweet=valtweet, tweetsentiment=sentiment_result['label'], imagename=filename,imagetype=imagetype.upper())
+            tweet = Tweets(tweet=valtweet, tweetsentiment=sentiment_result['label'], 
+                           imagename=filename,imagetypeCifar=imagetypeCifar.upper(),
+                           imagetypeXception=imagetypeXception.upper()
+                          )
             db.session.add(tweet)
             db.session.commit()
+            
             flash('Record was successfully added.')
             return redirect(request.url)
     else:
@@ -167,11 +188,12 @@ def index():
             tweet_dict["imagename"] = tweet.imagename
             filename_original, file_extension = os.path.splitext(tweet.imagename)
             tweet_dict["imagename_thumb"] = f'{filename_original}_thumb{file_extension}'
-            tweet_dict["imagetype"] = tweet.imagetype
+            tweet_dict["imagetypeCifar"] = tweet.imagetypeCifar
+            tweet_dict["imagetypeXception"] = tweet.imagetypeXception
             all_tweets.append(tweet_dict)
         return render_template("index.html",tweets=all_tweets)
 
 if __name__ == "__main__":
     print(("Loading Keras model and Flask starting server, please wait until server has fully started..."))
     init()
-    app.run()
+    app.run(threaded = False)
