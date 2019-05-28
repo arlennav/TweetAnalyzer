@@ -14,7 +14,7 @@ from tensorflow.keras.applications.xception import (
 )
 
 
-class imageClassification(object):
+class xceptionClassification(object):
 
     def __init__(self):
         #this model gets to a top-1 validation accuracy of 0.790   

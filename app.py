@@ -14,22 +14,11 @@ from werkzeug.utils import secure_filename
 from os.path import join, dirname, realpath
 from TwitterAPI import TwitterAPI
 
-import pickle
-import tensorflow as tf
-
-
-from keras.models import load_model
-from keras.preprocessing.sequence import pad_sequences
-from keras.preprocessing.text import Tokenizer
-from keras.models import Sequential
-from keras.optimizers import Adam
-from keras.utils import np_utils
-from keras import initializers
-from keras.models import model_from_json
 
 from config import *
 from cnnCifar100 import CIFAR100model
-from xceptionClassification import imageClassification
+from xceptionClassification import xceptionClassification
+from sentimentAnalysis import sentimentAnalysis
 
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -49,7 +38,6 @@ db = SQLAlchemy(app)
 Base = automap_base()
 # reflect the tables
 Base.prepare(db.engine, reflect=True)
-
 # Save references to each table
 Tweets = Base.classes.tweets
 
@@ -68,43 +56,18 @@ def add_header(r):
 '''
 
 def init():
-    global sentiment_model,xception_model,tokenizer,cnn_cifar100_model
-    # load the pre-trained Keras model for sentiment analysis
-    sentiment_model = load_model('resources/sentiment_model.h5')
-    #xception_model = Xception(include_top=True, weights='imagenet', input_tensor=None, input_shape=None, pooling=None, classes=1000)
-    tokenizer = Tokenizer()
-    with open('resources/tokenizer.pkl', 'rb') as handle:
-        tokenizer = pickle.load(handle)
-    #xception
-    xception_model= imageClassification()
-    #cifar
+    global sentiment_model,xception_model,cnn_cifar100_model
+    #Sentiment analysis
+    sentiment_model = sentimentAnalysis()
+    #Xception
+    xception_model= xceptionClassification()
+    #Cifar100
     cnn_cifar100_model= CIFAR100model()
     cnn_cifar100_model.load_model()
     
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def decode_sentiment(score, include_neutral=True):
-    if include_neutral:        
-        label = NEUTRAL
-        if score <= SENTIMENT_THRESHOLDS[0]:
-            label = NEGATIVE
-        elif score >= SENTIMENT_THRESHOLDS[1]:
-            label = POSITIVE
-        return label
-    else:
-        return NEGATIVE if score < 0.5 else POSITIVE
-
-def sentiment_predict(text, include_neutral=True):
-    # Tokenize text
-    x_test = pad_sequences(tokenizer.texts_to_sequences([text]), maxlen=300)
-    # Predict
-    score = sentiment_model.predict([x_test])[0]
-    # Decode sentiment
-    label = decode_sentiment(score, include_neutral=include_neutral)
-    return {"label": label, "score": float(score)}  
-
 
 '''
 send tweet
@@ -150,7 +113,7 @@ def index():
             thumb_image = resizeimage.resize_contain(image, [200, 200])
             thumb_image.save(os.path.join(app.config['UPLOAD_FOLDER'], f'{filename_original}_thumb{file_extension}'))
            
-            # Preditct image category
+            #Preditct image category
             #Cifar
             uploaded_img = plt.imread(uploaded_img_path)
             imagetypeCifar=cnn_cifar100_model.model_predict(uploaded_img)
@@ -162,8 +125,8 @@ def index():
             if imagetypeXception=='':
                 imagetypeXception='Not detected'
                 
-            # Preditct sentiment of the tweet
-            sentiment_result=sentiment_predict(valtweet)
+            #SentimentAnalysis
+            sentiment_result=sentiment_model.model_predict(valtweet)
             
             #Insert into Tweets table
             tweet = Tweets(tweet=valtweet, tweetsentiment=sentiment_result['label'], 
