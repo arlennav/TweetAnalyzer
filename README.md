@@ -2,7 +2,7 @@
 Twitter Sentiment Analysis Program in Python with Image Classification
 
 
-![alt text](https://github.com/annatheking/Project3_AirlineTweets/blob/master/overview.png)  
+![alt text](https://github.com/arlennav/TweetAnalyzer/blob/master/overview.png)  
   
   
 
