@@ -13,3 +13,4 @@ Twitter Sentiment Analysis Program in Python with Image Classification
 # Back end (App.py)  
 Flask  
 MySql  
+(mysql/Twitter.sql)
