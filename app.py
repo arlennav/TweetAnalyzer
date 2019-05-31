@@ -80,7 +80,9 @@ def tweet(tweetID):
             api = TwitterAPI(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET)
             with open(f'static/img/upload/{result.imagename}', 'rb') as file:
                 data = file.read()
-                tweet=f'This is a {result.tweetsentiment} tweet. \n Category: { result.imagetype} \n {result.tweet}'
+                tweet=f'This is a {result.tweetsentiment} tweet. \n\nCifar100: {result.imagetypeCifar} \n' 
+                tweet+=f'Xception: {result.imagetypeXception} \n\n'      
+                tweet+=f'{result.tweet}'
                 r = api.request('statuses/update_with_media', {'status': tweet}, {'media[]':data})
                 return jsonify(data=r.status_code)
     except e:
