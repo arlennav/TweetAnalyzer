@@ -6,7 +6,7 @@ Twitter Sentiment Analysis Program in Python with Image Classification
   
   
 
-# Front end (App.js) 
+# Front end (index.html,App.js) 
 
   
   
