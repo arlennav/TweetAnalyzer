@@ -19,6 +19,7 @@ from config import *
 from cnnCifar100 import CIFAR100model
 from xceptionClassification import xceptionClassification
 from sentimentAnalysis import sentimentAnalysis
+from facialExpressionRecognition import facialExpressionRecognition
 
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -56,7 +57,7 @@ def add_header(r):
 '''
 
 def init():
-    global sentiment_model,xception_model,cnn_cifar100_model
+    global sentiment_model,xception_model,cnn_cifar100_model,facial_emotion_model
     #Sentiment analysis
     sentiment_model = sentimentAnalysis()
     #Xception
@@ -64,6 +65,9 @@ def init():
     #Cifar100
     cnn_cifar100_model= CIFAR100model()
     cnn_cifar100_model.load_model()
+    
+    #Facial Emotion
+    facial_emotion_model = facialExpressionRecognition()
     
 def allowed_file(filename):
     return '.' in filename and \
@@ -129,11 +133,16 @@ def index():
                 
             #SentimentAnalysis
             sentiment_result=sentiment_model.model_predict(valtweet)
+
+            #Facial Emotion
+            facial_emotion_result=facial_emotion_model.model_predict(uploaded_img_path)
+            if facial_emotion_result=='':
+                facialEmotion='Not detected'
             
             #Insert into Tweets table
             tweet = Tweets(tweet=valtweet, tweetsentiment=sentiment_result['label'], 
                            imagename=filename,imagetypeCifar=imagetypeCifar.upper(),
-                           imagetypeXception=imagetypeXception.upper()
+                           imagetypeXception=imagetypeXception.upper(),facialEmotion = facial_emotion_result
                           )
             db.session.add(tweet)
             db.session.commit()
@@ -155,6 +164,7 @@ def index():
             tweet_dict["imagename_thumb"] = f'{filename_original}_thumb{file_extension}'
             tweet_dict["imagetypeCifar"] = tweet.imagetypeCifar
             tweet_dict["imagetypeXception"] = tweet.imagetypeXception
+            tweet_dict["facialEmotion"] = tweet.facialEmotion
             all_tweets.append(tweet_dict)
         return render_template("index.html",tweets=all_tweets)
 

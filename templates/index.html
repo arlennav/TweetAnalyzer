@@ -108,6 +108,8 @@
                   <span>{{ tweet.imagetypeCifar }}</span></p>
                 <p class="category">Xception:<br/>
                   <span>{{ tweet.imagetypeXception }}</span></p>
+                <p class="category">Face Emotion:<br/>
+                  <span>{{ tweet.facialEmotion }}</span></p>
 
                 <input class="btn btn-block btn-primary" type="button" value="Tweet"
                   onclick="sendTweet('{{ tweet.id }}'); return false;"
