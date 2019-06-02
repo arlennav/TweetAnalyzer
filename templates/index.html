@@ -112,8 +112,7 @@
                   <span>{{ tweet.facialEmotion }}</span></p>
 
                 <input class="btn btn-block btn-primary" type="button" value="Tweet"
-                  onclick="sendTweet('{{ tweet.id }}'); return false;"
-                  {{ 'disabled' if tweet.tweetsentiment=='NEGATIVE' }}>
+                  onclick="sendTweet('{{ tweet.id }}'); return false;" />
               </div>
             </div>
             {% endfor %}

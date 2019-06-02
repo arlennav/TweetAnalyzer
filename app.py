@@ -65,7 +65,6 @@ def init():
     #Cifar100
     cnn_cifar100_model= CIFAR100model()
     cnn_cifar100_model.load_model()
-    
     #Facial Emotion
     facial_emotion_model = facialExpressionRecognition()
     

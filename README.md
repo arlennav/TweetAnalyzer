@@ -5,6 +5,9 @@ Twitter Sentiment Analysis Program in Python with Image Classification
 ![alt text](https://github.com/arlennav/TweetAnalyzer/blob/master/overview.png)  
   
   
+  
+You can download all pre-trained models at the following link:
+[[https://www.dropbox.com/s/pfufezam4fiz9go/Resources.zip?dl=0]]
 
 # Front end (index.html,App.js) 
 
@@ -12,5 +15,7 @@ Twitter Sentiment Analysis Program in Python with Image Classification
   
 # Back end (App.py)  
 Flask  
-MySql  
+MySql
+
+Database and table schema:  
 (mysql/Twitter.sql)
