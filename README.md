@@ -7,6 +7,7 @@ Twitter Sentiment Analysis Program in Python with Image Classification
   
   
 You can download all pre-trained models at the following link:
+
 [[https://www.dropbox.com/s/pfufezam4fiz9go/Resources.zip?dl=0]]
 
 # Front end (index.html,App.js) 
