@@ -1,24 +1,4 @@
-/*
-  Theme Name: Flattern
-  Theme URL: https://bootstrapmade.com/flattern-multipurpose-bootstrap-template/
-  Author: BootstrapMade.com
-  Author URL: https://bootstrapmade.com
-*/
 
-/* === prettify === */
-
-@import url('../js/google-code-prettify/prettify.css');
-/* === fontawesome === */
-
-@import url('font-awesome.css');
-/* === custom icon === */
-
-@import url('custom-fonts.css');
-/* ==== overwrite bootstrap standard ==== */
-
-@import url('overwrite.css');
-@import url('animate.css');
-/* Table of content */
 
 /*===================================
 1. General

@@ -7,6 +7,8 @@ import numpy as np
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine,func
+from sqlalchemy import or_
+
 from flask_sqlalchemy import SQLAlchemy
 
 from flask import Flask, jsonify, render_template,redirect, url_for,request,flash
@@ -149,23 +151,43 @@ def index():
             flash('Record was successfully added.')
             return redirect(request.url)
     else:
+        return search_results('')
+
+@app.route("/search",methods = ['POST', 'GET'])
+def search():
+    if request.method == 'POST':
+        keyword=request.form['keyword']
+        if not keyword:
+            flash('Please include your search.')
+            return redirect(request.url)
+        return search_results(keyword)
+
+    
+def search_results(search):
+    if search=='':
         #Query table
         results = db.session.query(Tweets).order_by(Tweets.id.desc()).all()
-        # Create a dictionary from the row data and append to a list of all_passengers
-        all_tweets = []
-        for tweet in results:
-            tweet_dict = {}
-            tweet_dict["id"] = tweet.id
-            tweet_dict["tweet"] = tweet.tweet
-            tweet_dict["tweetsentiment"] = tweet.tweetsentiment
-            tweet_dict["imagename"] = tweet.imagename
-            filename_original, file_extension = os.path.splitext(tweet.imagename)
-            tweet_dict["imagename_thumb"] = f'{filename_original}_thumb{file_extension}'
-            tweet_dict["imagetypeCifar"] = tweet.imagetypeCifar
-            tweet_dict["imagetypeXception"] = tweet.imagetypeXception
-            tweet_dict["facialEmotion"] = tweet.facialEmotion
-            all_tweets.append(tweet_dict)
-        return render_template("index.html",tweets=all_tweets)
+    else:
+        keyword=f"%{search}%"
+        #Query table
+        results = db.session.query(Tweets).filter(or_(Tweets.tweetsentiment.like(keyword),Tweets.imagetypeCifar.like(keyword) ,Tweets.imagetypeXception.like(keyword),Tweets.facialEmotion.like(keyword))).order_by(Tweets.id.desc()).all()  
+        
+    # Create a dictionary from the row data and append to a list of Tweets
+    all_tweets = []
+    for tweet in results:
+        tweet_dict = {}
+        tweet_dict["id"] = tweet.id
+        tweet_dict["tweet"] = tweet.tweet
+        tweet_dict["tweetsentiment"] = tweet.tweetsentiment
+        tweet_dict["imagename"] = tweet.imagename
+        filename_original, file_extension = os.path.splitext(tweet.imagename)
+        tweet_dict["imagename_thumb"] = f'{filename_original}_thumb{file_extension}'
+        tweet_dict["imagetypeCifar"] = tweet.imagetypeCifar
+        tweet_dict["imagetypeXception"] = tweet.imagetypeXception
+        tweet_dict["facialEmotion"] = tweet.facialEmotion
+        all_tweets.append(tweet_dict)
+    return render_template("index.html",tweets=all_tweets) 
+            
 
 if __name__ == "__main__":
     print(("Loading Keras model and Flask starting server, please wait until server has fully started..."))
