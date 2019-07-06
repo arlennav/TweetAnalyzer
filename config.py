@@ -1,5 +1,5 @@
 UPLOAD_FOLDER = './static/img/upload'
-ALLOWED_EXTENSIONS = set(['jpg', 'jpeg'])
+ALLOWED_EXTENSIONS = set(['jpg', 'jpeg','png'])
 
 # SENTIMENT
 POSITIVE = "POSITIVE"

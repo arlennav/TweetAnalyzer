@@ -24,7 +24,7 @@ from sentimentAnalysis import sentimentAnalysis
 from facialExpressionRecognition import facialExpressionRecognition
 
 import matplotlib.pyplot as plt
-from PIL import Image
+from PIL import Image, ImageOps
 from resizeimage import resizeimage
 
 app = Flask(__name__)
@@ -86,7 +86,8 @@ def tweet(tweetID):
             with open(f'static/img/upload/{result.imagename}', 'rb') as file:
                 data = file.read()
                 tweet=f'This is a {result.tweetsentiment} tweet. \n\nCifar100: {result.imagetypeCifar} \n' 
-                tweet+=f'Xception: {result.imagetypeXception} \n\n'      
+                tweet+=f'Xception: {result.imagetypeXception} \n\n'   
+                tweet+=f'Face Emotion: {result.facialEmotion} \n\n'   
                 tweet+=f'{result.tweet}'
                 r = api.request('statuses/update_with_media', {'status': tweet}, {'media[]':data})
                 return jsonify(data=r.status_code)
@@ -100,26 +101,32 @@ def index():
         if not valtweet:
             flash('Please include your tweet.')
             return redirect(request.url)
+        
         # check if the post request has the file part
         if 'file' not in request.files:
             flash('No attachemnt.')
             return redirect(request.url)
+        
         file = request.files['file']
         # if user does not select file, browser also
         # submit an empty part without filename
         if file.filename == '':
             flash('No selected file.')
             return redirect(request.url)
+        
         if file and allowed_file(file.filename):
             # Save uploaded image
             filename = secure_filename(file.filename)
+
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             uploaded_img_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             filename_original, file_extension = os.path.splitext(filename) 
+           
             image = Image.open(uploaded_img_path)
-            thumb_image = resizeimage.resize_contain(image, [200, 200])
+            thumb_image = ImageOps.fit(image, (200,200),Image.ANTIALIAS)
             thumb_image.save(os.path.join(app.config['UPLOAD_FOLDER'], f'{filename_original}_thumb{file_extension}'))
            
+
             #Preditct image category
             #Cifar
             uploaded_img = plt.imread(uploaded_img_path)
@@ -150,6 +157,9 @@ def index():
             
             flash('Record was successfully added.')
             return redirect(request.url)
+        else:
+            flash('Invaid Image extension (Only jpg/png).')
+            return redirect(request.url) 
     else:
         return search_results('')
 
@@ -170,7 +180,7 @@ def search_results(search):
     else:
         keyword=f"%{search}%"
         #Query table
-        results = db.session.query(Tweets).filter(or_(Tweets.tweetsentiment.like(keyword),Tweets.imagetypeCifar.like(keyword) ,Tweets.imagetypeXception.like(keyword),Tweets.facialEmotion.like(keyword))).order_by(Tweets.id.desc()).all()  
+        results = db.session.query(Tweets).filter(or_(Tweets.tweet.like(keyword),Tweets.tweetsentiment.like(keyword),Tweets.imagetypeCifar.like(keyword) ,Tweets.imagetypeXception.like(keyword),Tweets.facialEmotion.like(keyword))).order_by(Tweets.id.desc()).all()  
         
     # Create a dictionary from the row data and append to a list of Tweets
     all_tweets = []
