@@ -8,9 +8,9 @@ Twitter Sentiment Analysis Program in Python with Image Classification
 # Web Application Demo
 
  
-![alt text](https://github.com/arlennav/TweetAnalyzer/blob/master/Demo01.png) 
+![alt text](https://github.com/arlennav/TweetAnalyzer/blob/master/Demo01.PNG) 
  
-![alt text](https://github.com/arlennav/TweetAnalyzer/blob/master/Demo02.png) 
+![alt text](https://github.com/arlennav/TweetAnalyzer/blob/master/Demo02.PNG) 
  
 
 You can download all pre-trained models at the following link:
